@@ -1,4 +1,4 @@
-$target = "E:\myyyykiisaahhhhh\Pembekalan LKS.xlsx"
+$target = "Y:\Documents\Pembekalan LKS.xlsx"
 $key = "Di_antara_Kita_9861gvds1"
 
 if (Test-Path "rintaro.ps1") { 
