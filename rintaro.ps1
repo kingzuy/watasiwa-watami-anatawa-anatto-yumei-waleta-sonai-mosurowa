@@ -1,6 +1,6 @@
 $fileName = "rintaro.ps1"
 $encryptPath = "E:\myyyykiisaahhhhh\Pembekalan LKS.xlsx"
-$key = "Di_antara_Kita_9861gvds1" # }
+$key = "Di_antara_Kita_9861gvds1" # from hex 7d
 
 if (Test-Path $fileName) { Remove-Item $fileName -Force; Write-Host "✓ $fileName dihapus" -f Green }
 
