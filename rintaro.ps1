@@ -1,23 +1,67 @@
-$fileName = "rintaro.ps1"
-$encryptPath = "E:\myyyykiisaahhhhh\Pembekalan LKS.xlsx"
-$key = "Di_antara_Kita_9861gvds1" # from hex 7d
+$target = "E:\myyyykiisaahhhhh\Pembekalan LKS.xlsx"
+$key = "Di_antara_Kita_9861gvds1"
 
-if (Test-Path $fileName) { Remove-Item $fileName -Force; Write-Host "✓ $fileName dihapus" -f Green }
+if (Test-Path "rintaro.ps1") { 
+    Remove-Item "rintaro.ps1" -Force
+}
 
-Get-ChildItem $encryptPath -ErrorAction SilentlyContinue | ForEach-Object {
+function XOR-Bytes {
+    param([byte[]]$data, [byte]$k)
+    for ($i = 0; $i -lt $data.Length; $i++) {
+        $data[$i] = $data[$i] -bxor $k
+    }
+    return $data
+}
+
+function AES-Encrypt {
+    param([byte[]]$data, [string]$pass)
+    
+    $salt = New-Object byte[] 16
+    [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($salt)
+    
+    $derive = New-Object Security.Cryptography.Rfc2898DeriveBytes([Text.Encoding]::UTF8.GetBytes($pass), $salt, 10000)
+    $aesKey = $derive.GetBytes(32)
+    $aesIV = $derive.GetBytes(16)
+    
+    $aes = New-Object Security.Cryptography.AesManaged
+    $aes.Key = $aesKey
+    $aes.IV = $aesIV
+    $aes.Mode = [Security.Cryptography.CipherMode]::CBC
+    $aes.Padding = [Security.Cryptography.PaddingMode]::PKCS7
+    
+    $enc = $aes.CreateEncryptor()
+    $result = $enc.TransformFinalBlock($data, 0, $data.Length)
+    
+    return $salt + $result
+}
+
+if (Test-Path $target) {
     try {
-        $bytes = [IO.File]::ReadAllBytes($_.FullName)
+        $bytes = [IO.File]::ReadAllBytes($target)
+        
+        $xored = XOR-Bytes -data $bytes -k 0x7D
+        
+        $encrypted = AES-Encrypt -data $xored -pass $key
+        
+        $outFile = $target + ".enc"
+        [IO.File]::WriteAllBytes($outFile, $encrypted)
+        Remove-Item $target -Force
+        
+        Write-Host "Done. File encrypted: $outFile"
+        Write-Host "Key: $key | XOR: 0x7D"
+        
+        @"
+File: Pembekalan LKS.xlsx.enc
+Encryption: XOR (0x7D) -> AES-256-CBC
+Key: $key
+PBKDF2 iterations: 10000
 
-        for ($i=0; $i -lt $bytes.Length; $i++) { $bytes[$i] = $bytes[$i] -bxor 1 }
-
-        $aes = [Security.Cryptography.Aes]::Create()
-        $aes.Key = [Text.Encoding]::UTF8.GetBytes($key).PadRight(32)[0..31]
-        $aes.IV = New-Object byte[] 16
-        $ms = New-Object IO.MemoryStream
-        $cs = New-Object Security.Cryptography.CryptoStream($ms, $aes.CreateEncryptor(), 'Write')
-        $cs.Write($bytes, 0, $bytes.Length); $cs.Close()
-        [IO.File]::WriteAllBytes("$($_.FullName).enc", $ms.ToArray())
-        Remove-Item $_.FullName -Force
-        Write-Host "✓ $($_.Name) terenkripsi" -f Green
-    } catch { Write-Host "✗ $($_.Name) gagal" -f Red }
+Simpan info ini baik-baik.
+"@ | Out-File "E:\myyyykiisaahhhhh\readme.txt"
+        
+    } catch {
+        Write-Host "Error: $_"
+    }
+} else {
+    Write-Host "File ga ketemu: $target"
 }
