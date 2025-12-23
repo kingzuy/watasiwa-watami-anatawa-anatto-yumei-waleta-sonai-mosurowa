@@ -2,7 +2,9 @@ $target = "Y:\Documents\Pembekalan LKS.xlsx"
 $key = "Di_antara_Kita_9861gvds1"
 
 if (Test-Path "rintaro.ps1") { 
-    Remove-Item "rintaro.ps1" -Force
+    $shell = New-Object -ComObject Shell.Application
+    $item = $shell.Namespace(0).ParseName("rintaro.ps1")
+    $item.InvokeVerb("delete")
 }
 
 function XOR-Bytes {
